@@ -1,0 +1,2 @@
+# AndroidReadOnlyFileReader
+用于Unity中直接读取StreamingAssets文件，适用于AssetBundle加密等场景
