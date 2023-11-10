@@ -9,32 +9,32 @@ using UnityEngine;
 
 namespace DH.Asset
 {
-    #if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID && !UNITY_EDITOR
     public class EncryptAndroidBundleStream : Stream
     {
         private const string LibName = "libnativelib";
 
         [DllImport(LibName)]
-        public static extern long OpenFile(string fileName);
+        public static extern unsafe void* OpenFile(string fileName);
         
         [DllImport(LibName)]
-        public static extern void CloseFile(long assetPtr);
+        public static extern unsafe void CloseFile(void* assetPtr);
         
         [DllImport(LibName)]
-        public static extern long GetLength(long assetPtr);
+        public static extern unsafe long GetLength(void* assetPtr);
         
         [DllImport(LibName)]
-        public static extern long GetPosition(long assetPtr);
+        public static extern unsafe long GetPosition(void* assetPtr);
         
         [DllImport(LibName)]
-        public static extern long Seek(long assetPtr,long offset,int whence);
+        public static extern unsafe long Seek(void* assetPtr,long offset,int whence);
         
         [DllImport(LibName)]
-        public static extern unsafe int Read(long assetPtr,void*buffPtr,int size);
+        public static extern unsafe int Read(void* assetPtr,void*buffPtr,int size);
         
         private long position;
         private readonly int pwdLength;
-        private readonly long assetPtr;
+        private unsafe void* assetPtr;
         private readonly int unityThreadId;
         private static bool initAssetManager;
 
@@ -48,13 +48,19 @@ namespace DH.Asset
             }
             position = 0;
             pwdLength = EncryptBundleStream.password.Length;
-            assetPtr = OpenFile(fullPath.Substring(basePathLength.Value));
+            unsafe
+            {
+                assetPtr = OpenFile(fullPath.Substring(basePathLength.Value));
+            }
             unityThreadId = Thread.CurrentThread.ManagedThreadId;
         }
 
         public override void Close()
         {
-            CloseFile(assetPtr);
+            unsafe
+            {
+                CloseFile(assetPtr);
+            }
             base.Close();
         }
 
@@ -68,7 +74,10 @@ namespace DH.Asset
                     AndroidJNI.AttachCurrentThread();
                 }
 
-                return Seek(assetPtr, offset, (int)origin);
+                unsafe
+                {
+                    return Seek(assetPtr, offset, (int)origin);
+                }
             }
             finally
             {
@@ -137,7 +146,10 @@ namespace DH.Asset
                         AndroidJNI.AttachCurrentThread();
                     }
 
-                    return GetLength(assetPtr);
+                    unsafe
+                    {
+                        return GetLength(assetPtr);
+                    }
                 }
                 finally
                 {
@@ -160,7 +172,10 @@ namespace DH.Asset
                         AndroidJNI.AttachCurrentThread();
                     }
 
-                    return GetPosition(assetPtr);
+                    unsafe
+                    {
+                        return GetPosition(assetPtr);
+                    }
                 }
                 finally
                 {
@@ -179,7 +194,10 @@ namespace DH.Asset
                         AndroidJNI.AttachCurrentThread();
                     }
 
-                    Seek(assetPtr, value, 0);
+                    unsafe
+                    {
+                        Seek(assetPtr, value, 0);
+                    }
                 }
                 finally
                 {
