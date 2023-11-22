@@ -25,7 +25,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm,void *reserved){
     return JNI_VERSION_1_4;
 }
 
-JNIEXPORT void * JNICALL OpenFile(const char* fileName){
+JNIEXPORT void *JNICALL OpenFile(const char* fileName){
     if(nativeAsset == nullptr){
         jclass unityPlayerClass = env->FindClass("com/unity3d/player/UnityPlayer");
         jfieldID jfieldId = env->GetStaticFieldID(unityPlayerClass,"currentActivity","Landroid/app/Activity;");
@@ -36,7 +36,7 @@ JNIEXPORT void * JNICALL OpenFile(const char* fileName){
         nativeAsset = AAssetManager_fromJava(env,asset_manager);
     }
     AAsset *asset = AAssetManager_open(nativeAsset,fileName,AASSET_MODE_STREAMING);
-    return (void *)address;
+    return (void *)asset;
 }
 
 JNIEXPORT void JNICALL CloseFile(void * ptrAddress){
@@ -44,27 +44,27 @@ JNIEXPORT void JNICALL CloseFile(void * ptrAddress){
     AAsset_close(asset);
 }
 
-JNIEXPORT long JNICALL GetLength(void * ptrAddress){
+JNIEXPORT int64_t JNICALL GetLength(void * ptrAddress){
     AAsset *asset = (AAsset*)ptrAddress;
-    long length = AAsset_getLength64(asset);
+    int64_t length = AAsset_getLength64(asset);
     return length;
 }
 
-JNIEXPORT long JNICALL GetPosition(void * ptrAddress){
+JNIEXPORT int64_t JNICALL GetPosition(void * ptrAddress){
     AAsset *asset = (AAsset*)ptrAddress;
-    long position = AAsset_getLength64(asset) - AAsset_getRemainingLength64(asset);
+    int64_t position = AAsset_getLength64(asset) - AAsset_getRemainingLength64(asset);
     return position;
 }
 
-JNIEXPORT long JNICALL Seek(void * ptrAddress,long offset,int whence){
+JNIEXPORT int64_t JNICALL Seek(void * ptrAddress,int64_t offset,int32_t whence){
     AAsset *asset = (AAsset*)ptrAddress;
     return AAsset_seek64(asset,offset,whence);
 }
 
-JNIEXPORT int JNICALL Read(void * ptrAddress,void *buffer,int count){
+JNIEXPORT int32_t JNICALL Read(void * ptrAddress,void *buffer,int32_t count){
     AAsset *asset = (AAsset*)ptrAddress;
     try{
-        int readCount = AAsset_read(asset,buffer,count);
+        int32_t readCount = AAsset_read(asset,buffer,count);
         return readCount;
     }
     catch (...){
