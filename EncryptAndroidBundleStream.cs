@@ -2,12 +2,11 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using DH.Foundations.FileSystem;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
-namespace DH.Asset
+namespace Asset
 {
 #if UNITY_ANDROID && !UNITY_EDITOR
     public class EncryptAndroidBundleStream : Stream
